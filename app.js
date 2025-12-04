@@ -61,7 +61,7 @@ authForm.addEventListener('submit', (e) => {
             .then((userCredential) => {
                 // Successful login
                 alert("Successfully logged in!");
-                window.location.href = "grand.html";
+                window.location.href = "Tasker.html";
             })
             .catch((error) => {
                 const errorMessage = error.message;
@@ -83,4 +83,5 @@ authForm.addEventListener('submit', (e) => {
             });
     }
 });
+
 
