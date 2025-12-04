@@ -31,7 +31,7 @@ submit.addEventListener("click", function(e) {
       // Signed up 
       const user = userCredential.user;
       alert("Creating account....");
-      window.location.href = "grand.html";
+      window.location.href = "Tasker.html";
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -39,4 +39,5 @@ submit.addEventListener("click", function(e) {
       alert(errorMessage); // Alert the actual error message
       console.error("Error:", errorCode, errorMessage);
     });
+
 });
