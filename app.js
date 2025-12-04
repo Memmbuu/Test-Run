@@ -74,7 +74,7 @@ authForm.addEventListener('submit', (e) => {
             .then((userCredential) => {
                 // Successful account creation
                 alert("Account created successfully!");
-                window.location.href = "grand.html";
+                window.location.href = "Tasker.html";
             })
             .catch((error) => {
                 const errorMessage = error.message;
@@ -83,3 +83,4 @@ authForm.addEventListener('submit', (e) => {
             });
     }
 });
+
