@@ -1,203 +1,320 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasker</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monthly Checklist Calendar</title>
 <style>
-body {
-  margin: 0;
-  background: #0b0b0b;
-  font-family: Arial, sans-serif;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+:root{
+  --bg:#0b0b0b;
+  --card:#101010;
+  --muted:#9e9e9e;
+  --line:#2a2a2a;
+  --accent:#e6e6e6;
+  --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  font-family:system-ui;
+  color:var(--accent);
+  background:linear-gradient(180deg,var(--bg),#050505)
 }
 
-.app {
-  background: #111;
-  width: 330px;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(255,255,255,0.05);
+.wrap{
+  max-width:1000px;
+  margin:24px auto;
+  padding:16px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px
+}
+@media(min-width:820px){
+  .wrap{grid-template-columns:260px 1fr}
 }
 
-h2 {
-  text-align: center;
-  margin-bottom: 15px;
+.card{
+  background:linear-gradient(180deg,var(--card),#0b0b0b);
+  border-radius:14px;
+  padding:14px;
+  border:1px solid var(--line)
 }
 
-input {
-  width: 75%;
-  background: black;
-  color: white;
-  border: 1px solid #333;
-  padding: 8px;
-  border-radius: 6px;
+.sidebar{
+  display:flex;
+  flex-direction:column;
+  gap:12px
 }
 
-button {
-  background: white;
-  color: black;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
+h1{margin:0;font-size:18px}
+.sub{color:var(--muted);font-size:12px}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted)}
+.input{
+  background:#0b0b0b;
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--accent);
+  padding:8px;
+  font-size:14px
 }
 
-.task-list {
-  margin-top: 15px;
-  max-height: 320px;
-  overflow-y: auto;
+.btn{
+  background:var(--glass);
+  border:1px solid var(--line);
+  padding:8px;
+  border-radius:8px;
+  color:var(--accent);
+  font-size:13px;
+  cursor:pointer
 }
 
-.day {
-  border: 1px solid #222;
-  padding: 8px;
-  margin-bottom: 8px;
-  border-radius: 8px;
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px
+}
+.stat{
+  background:#0d0d0d;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:8px;
+  text-align:center
+}
+.stat .big{font-size:17px;font-weight:700}
+.stat .small{font-size:12px;color:var(--muted)}
+
+.month-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px
 }
 
-.day.past {
-  opacity: 0.35;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:8px
+}
+.weekday{font-size:12px;text-align:center;color:var(--muted)}
+
+.day{
+  min-height:70px;
+  border-radius:10px;
+  background:linear-gradient(180deg,transparent,var(--glass));
+  padding:8px;
+  position:relative;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.03);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between
+}
+.day .num{font-weight:600}
+.day .note{font-size:10px;color:var(--muted)}
+
+.day.done{
+  background:#0e0e0e;
+  border-color:#3a3a3a
+}
+.day.done::after{
+  content:'✓';
+  position:absolute;
+  right:6px;
+  top:6px
+}
+.day.missed .num{
+  text-decoration:line-through;
+  color:var(--muted)
 }
 
-.task {
-  display: flex;
-  align-items: center;
-  margin: 5px 0;
-}
+.empty{border:none;background:transparent}
 
-.task input {
-  width: auto;
-  margin-right: 8px;
+footer{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between
 }
-
-.crossed {
-  text-decoration: line-through;
-  opacity: 0.5;
+.task-title{
+  font-size:15px;
+  font-weight:600;
 }
 </style>
-
 </head>
 <body>
 
-<div class="app">
-  <h2>Tasker</h2>
+<div class="wrap">
 
-  <div>
-    <input id="taskInput" placeholder="Add task...">
-    <button onclick="addTask()">ADD</button>
-  </div>
+  <!-- SIDEBAR -->
+  <aside class="card sidebar">
+    <h1>Task</h1>
+    <div class="sub">Saved locally in your browser</div>
 
-  <div class="task-list" id="calendar"></div>
+    <div class="field">
+      <label>Task name</label>
+      <input id="taskname" class="input" placeholder="e.g. Study, Workout, Quran">
+    </div>
+
+    <button id="saveTask" class="btn">Save task</button>
+
+    <div class="card">
+      <div class="task-title" id="taskLabel">No task set</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="big" id="doneCount">0</div><div class="small">Done</div></div>
+      <div class="stat"><div class="big" id="missedCount">0</div><div class="small">Missed</div></div>
+      <div class="stat"><div class="big" id="totalCount">0</div><div class="small">Days</div></div>
+      <div class="stat"><div class="big" id="ratio">0%</div><div class="small">Success</div></div>
+    </div>
+
+    <button id="resetMonth" class="btn">Reset month</button>
+  </aside>
+
+  <!-- CALENDAR -->
+  <main class="card">
+    <div class="month-row">
+      <div id="monthLabel"></div>
+      <div class="sub" id="statusLine"></div>
+    </div>
+
+    <div class="grid" id="weekdays"></div>
+    <div class="grid" id="calendar"></div>
+
+    <footer>
+      <div>Click a day to mark done</div>
+      <div>Unticked past days count as missed</div>
+    </footer>
+  </main>
+
 </div>
 
 <script>
+(function(){
+  const TASK_KEY = 'calendar-task';
+  const DATA_KEY = 'calendar-data-v2';
 
-const calendar = document.getElementById("calendar");
-const today = new Date().toDateString();
-let data = JSON.parse(localStorage.getItem("taskData")) || {};
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const monthKey = year + '-' + String(month+1).padStart(2,'0');
 
-// Create 14 days view (past + today + future)
-function buildCalendar() {
-  calendar.innerHTML = "";
+  const taskInput = document.getElementById('taskname');
+  const taskLabel = document.getElementById('taskLabel');
 
-  for (let i = -5; i < 9; i++) {
-    let date = new Date();
-    date.setDate(date.getDate() + i);
-    let key = date.toDateString();
+  const doneEl = document.getElementById('doneCount');
+  const missEl = document.getElementById('missedCount');
+  const totalEl = document.getElementById('totalCount');
+  const ratioEl = document.getElementById('ratio');
 
-    if (!data[key]) data[key] = [];
+  const monthLabel = document.getElementById('monthLabel');
+  const statusLine = document.getElementById('statusLine');
+  const calendar = document.getElementById('calendar');
+  const weekdays = document.getElementById('weekdays');
 
-    let div = document.createElement("div");
-    div.className = "day";
+  let task = localStorage.getItem(TASK_KEY) || '';
+  let data = JSON.parse(localStorage.getItem(DATA_KEY) || '{}');
+  if(!data[monthKey]) data[monthKey] = {};
 
-    if (date < new Date(today)) div.classList.add("past");
-
-    let label = document.createElement("div");
-    label.innerHTML = "<b>" + key + "</b>";
-    div.appendChild(label);
-
-    data[key].forEach((task, index) => {
-      let row = document.createElement("div");
-      row.className = "task";
-
-      let box = document.createElement("input");
-      box.type = "checkbox";
-      box.checked = task.done;
-
-      let span = document.createElement("span");
-      span.innerText = task.text;
-
-      if (task.done) span.classList.add("crossed");
-
-      // Lock past days completely
-      if (date < new Date(today)) {
-        box.disabled = true;
-      }
-
-      // Lock today crossing until tomorrow
-      if (key === today && task.locked) {
-        box.disabled = true;
-      }
-
-      box.onclick = () => {
-        task.done = box.checked;
-        localStorage.setItem("taskData", JSON.stringify(data));
-        buildCalendar();
-      };
-
-      row.appendChild(box);
-      row.appendChild(span);
-      div.appendChild(row);
-    });
-
-    calendar.appendChild(div);
+  function saveAll(){
+    localStorage.setItem(TASK_KEY, task);
+    localStorage.setItem(DATA_KEY, JSON.stringify(data));
   }
 
-  localStorage.setItem("taskData", JSON.stringify(data));
-}
+  // Load task
+  if(task) taskInput.value = task;
+  taskLabel.textContent = task || 'No task set';
 
-// Add task only to today
-function addTask() {
-  const input = document.getElementById("taskInput");
-  const val = input.value.trim();
-  if (!val) return;
+  document.getElementById('saveTask').onclick = ()=>{
+    task = taskInput.value || '';
+    taskLabel.textContent = task || 'No task set';
+    saveAll();
+  };
 
-  data[today].push({
-    text: val,
-    done: false,
-    locked: true
-  });
+  // Month label
+  monthLabel.textContent = today.toLocaleString(undefined,{month:'long',year:'numeric'});
 
-  input.value = "";
-  localStorage.setItem("taskData", JSON.stringify(data));
-  buildCalendar();
-}
+  // Weekdays
+  for(let i=0;i<7;i++){
+    const d = new Date(2024,0,7+i);
+    const el = document.createElement('div');
+    el.className = 'weekday';
+    el.textContent = d.toLocaleDateString(undefined,{weekday:'short'});
+    weekdays.appendChild(el);
+  }
 
-// Unlock today tasks tomorrow
-function autoLock() {
-  let now = new Date();
-  let last = localStorage.getItem("lastDate");
+  const start = new Date(year,month,1);
+  const daysInMonth = new Date(year,month+1,0).getDate();
 
-  if (last !== today) {
-    if (data[last]) {
-      data[last].forEach(t => t.locked = false);
+  for(let i=0;i<start.getDay();i++){
+    const e = document.createElement('div');
+    e.className = 'empty';
+    calendar.appendChild(e);
+  }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const date = new Date(year,month,d);
+    const cell = document.createElement('div');
+    cell.className = 'day';
+
+    const num = document.createElement('div');
+    num.className='num';
+    num.textContent=d;
+
+    const note = document.createElement('div');
+    note.className='note';
+    note.textContent=date.toLocaleDateString(undefined,{weekday:'long'});
+
+    cell.append(num,note);
+
+    const todayMid = new Date().setHours(0,0,0,0);
+
+    if(data[monthKey][d]==='done') cell.classList.add('done');
+    else if(date < todayMid) cell.classList.add('missed');
+
+    cell.onclick = ()=>{
+      if(cell.classList.contains('done')){
+        cell.classList.remove('done');
+        delete data[monthKey][d];
+        if(date < todayMid) cell.classList.add('missed');
+      }else{
+        cell.classList.add('done');
+        cell.classList.remove('missed');
+        data[monthKey][d]='done';
+      }
+      saveAll();
+      updateStats();
+    };
+
+    calendar.appendChild(cell);
+  }
+
+  function updateStats(){
+    const total = daysInMonth;
+    const done = Object.keys(data[monthKey]).length;
+    const missed = total - done;
+
+    totalEl.textContent = total;
+    doneEl.textContent = done;
+    missEl.textContent = missed;
+    ratioEl.textContent = Math.round((done/total)*100)+'%';
+    statusLine.textContent = done+' / '+total+' done';
+  }
+
+  updateStats();
+
+  document.getElementById('resetMonth').onclick = ()=>{
+    if(confirm('Reset this month?')){
+      data[monthKey]={};
+      saveAll();
+      location.reload();
     }
-    localStorage.setItem("lastDate", today);
-  }
-
-  localStorage.setItem("taskData", JSON.stringify(data));
-}
-
-autoLock();
-buildCalendar();
-
+  };
+})();
 </script>
 
 </body>
