@@ -129,6 +129,9 @@ h1{margin:0;font-size:18px}
   text-decoration:line-through;
   color:var(--muted)
 }
+.day.today{
+  border:1px solid #e6e6e6;
+}
 
 .empty{border:none;background:transparent}
 
@@ -186,8 +189,8 @@ footer{
     <div class="grid" id="calendar"></div>
 
     <footer>
-      <div>Click a day to mark done</div>
-      <div>Unticked past days count as missed</div>
+      <div>Only today can be marked done</div>
+      <div>Past days are crossed and future days cannot be clicked</div>
     </footer>
   </main>
 
@@ -196,7 +199,7 @@ footer{
 <script>
 (function(){
   const TASK_KEY = 'calendar-task';
-  const DATA_KEY = 'calendar-data-v2';
+  const DATA_KEY = 'calendar-data-v5';
 
   const today = new Date();
   const year = today.getFullYear();
@@ -249,7 +252,9 @@ footer{
 
   const start = new Date(year,month,1);
   const daysInMonth = new Date(year,month+1,0).getDate();
+  const todayMid = new Date().setHours(0,0,0,0);
 
+  // Empty slots for first day of week
   for(let i=0;i<start.getDay();i++){
     const e = document.createElement('div');
     e.className = 'empty';
@@ -271,19 +276,20 @@ footer{
 
     cell.append(num,note);
 
-    const todayMid = new Date().setHours(0,0,0,0);
-
+    // Automatic past day marking
     if(data[monthKey][d]==='done') cell.classList.add('done');
     else if(date < todayMid) cell.classList.add('missed');
+    else if(date.getTime() === todayMid) cell.classList.add('today');
 
+    // Only allow marking today
     cell.onclick = ()=>{
+      if(date.getTime() !== todayMid) return;
+
       if(cell.classList.contains('done')){
         cell.classList.remove('done');
         delete data[monthKey][d];
-        if(date < todayMid) cell.classList.add('missed');
-      }else{
+      } else {
         cell.classList.add('done');
-        cell.classList.remove('missed');
         data[monthKey][d]='done';
       }
       saveAll();
