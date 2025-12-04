@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasker Login</title>
+<link rel="icon" href="MeTube.png">
+
+<style>
+:root {
+  --bg: #0b0b0b;
+  --card: #101010;
+  --muted: #9e9e9e;
+  --line: #2a2a2a;
+  --accent: #e6e6e6;
+  --glass: rgba(255,255,255,0.03);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-family: system-ui, Arial;
+  background: linear-gradient(180deg, var(--bg), #050505);
+  color: var(--accent);
+}
+
+.card {
+  background: linear-gradient(180deg, var(--card), #0b0b0b);
+  width: 320px;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+}
+
+.logo {
+  text-align: center;
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.sub {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+input {
+  width: 100%;
+  background: #0b0b0b;
+  border: 1px solid var(--line);
+  color: white;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+button {
+  width: 100%;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+a {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="logo">TASKER</div>
+<div class="sub" id="form-header">SIGN UP</div>
+
+<form id="auth-form">
+  <input type="email" id="email" placeholder="email">
+  <input type="password" id="password" placeholder="password">
+  <button id="submit">Sign Up</button>
+</form>
+
+<a href="#" id="toggle-link">Already have an account? Login</a>
+
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
