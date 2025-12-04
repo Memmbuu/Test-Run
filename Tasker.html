@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasker</title>
+
+<style>
+body {
+  margin: 0;
+  background: #0b0b0b;
+  font-family: Arial, sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  background: #111;
+  width: 330px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(255,255,255,0.05);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+input {
+  width: 75%;
+  background: black;
+  color: white;
+  border: 1px solid #333;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+button {
+  background: white;
+  color: black;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.task-list {
+  margin-top: 15px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.day {
+  border: 1px solid #222;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.day.past {
+  opacity: 0.35;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+
+.task input {
+  width: auto;
+  margin-right: 8px;
+}
+
+.crossed {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+</style>
+
+</head>
+<body>
+
+<div class="app">
+  <h2>Tasker</h2>
+
+  <div>
+    <input id="taskInput" placeholder="Add task...">
+    <button onclick="addTask()">ADD</button>
+  </div>
+
+  <div class="task-list" id="calendar"></div>
+</div>
+
+<script>
+
+const calendar = document.getElementById("calendar");
+const today = new Date().toDateString();
+let data = JSON.parse(localStorage.getItem("taskData")) || {};
+
+// Create 14 days view (past + today + future)
+function buildCalendar() {
+  calendar.innerHTML = "";
+
+  for (let i = -5; i < 9; i++) {
+    let date = new Date();
+    date.setDate(date.getDate() + i);
+    let key = date.toDateString();
+
+    if (!data[key]) data[key] = [];
+
+    let div = document.createElement("div");
+    div.className = "day";
+
+    if (date < new Date(today)) div.classList.add("past");
+
+    let label = document.createElement("div");
+    label.innerHTML = "<b>" + key + "</b>";
+    div.appendChild(label);
+
+    data[key].forEach((task, index) => {
+      let row = document.createElement("div");
+      row.className = "task";
+
+      let box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = task.done;
+
+      let span = document.createElement("span");
+      span.innerText = task.text;
+
+      if (task.done) span.classList.add("crossed");
+
+      // Lock past days completely
+      if (date < new Date(today)) {
+        box.disabled = true;
+      }
+
+      // Lock today crossing until tomorrow
+      if (key === today && task.locked) {
+        box.disabled = true;
+      }
+
+      box.onclick = () => {
+        task.done = box.checked;
+        localStorage.setItem("taskData", JSON.stringify(data));
+        buildCalendar();
+      };
+
+      row.appendChild(box);
+      row.appendChild(span);
+      div.appendChild(row);
+    });
+
+    calendar.appendChild(div);
+  }
+
+  localStorage.setItem("taskData", JSON.stringify(data));
+}
+
+// Add task only to today
+function addTask() {
+  const input = document.getElementById("taskInput");
+  const val = input.value.trim();
+  if (!val) return;
+
+  data[today].push({
+    text: val,
+    done: false,
+    locked: true
+  });
+
+  input.value = "";
+  localStorage.setItem("taskData", JSON.stringify(data));
+  buildCalendar();
+}
+
+// Unlock today tasks tomorrow
+function autoLock() {
+  let now = new Date();
+  let last = localStorage.getItem("lastDate");
+
+  if (last !== today) {
+    if (data[last]) {
+      data[last].forEach(t => t.locked = false);
+    }
+    localStorage.setItem("lastDate", today);
+  }
+
+  localStorage.setItem("taskData", JSON.stringify(data));
+}
+
+autoLock();
+buildCalendar();
+
+</script>
+
+</body>
+</html>
